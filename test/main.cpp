@@ -1,6 +1,5 @@
 #include "result.hpp"
 #include <iostream>
-using namespace resultpp;
 // Custom error types
 struct ParseError {
     std::string message;
@@ -16,7 +15,7 @@ struct MyError {
 struct Coordinates {
     int x, y;
 
-    constexpr static Result<Coordinates, Error<MyError, ParseError>> fromString(std::string_view v) {
+    constexpr static auto fromString(std::string_view v) -> Result<Coordinates, Error<MyError, ParseError>> {
         // A helper lambda to parse an integer.
         auto parseInt = [](std::string_view str) constexpr -> Result<int, ParseError> {
             int value{};
