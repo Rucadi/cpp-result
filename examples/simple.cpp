@@ -1,4 +1,4 @@
-#include "result.hpp"
+#include "match.hpp"
 #include <string_view>
 #include <iostream>
 
@@ -25,8 +25,8 @@ Result<int, ERR2> getError2()
 
 Result<int, Error<ERR1, ERR2>> test()
 {
-    auto t = try_get(getError());
-    auto t2 = try_get(getError2());
+    int t = try_get(getError());
+    int t2 = try_get(getError2());
 
     return 10;
 }

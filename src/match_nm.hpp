@@ -1,5 +1,4 @@
-#ifndef RESULTPPNM_HPP
-#define RESULTPPNM_HPP
+#pragma once
 
 #include <variant>
 #include <tuple>
@@ -20,7 +19,7 @@
     std::get<0>(std::forward<decltype(_result)>(_result));    \
 })
 
-namespace resultpp {
+namespace cppmatch {
 
     // ### Exposed Type: Result
     // A type alias for std::variant<T, E>, representing a success value T or an error E.
@@ -33,7 +32,7 @@ namespace resultpp {
     using Error = std::variant<Ts...>;
 
     // ### Internal Helpers in detail Namespace
-    namespace detail {
+    namespace cppmatch_detail {
 
         // Check if a type is a std::variant.
         template<typename T>
@@ -127,22 +126,20 @@ namespace resultpp {
     // Applies pattern matching on a variant using provided lambdas.
     template<typename Variant, typename... Lambdas>
     constexpr auto match(Variant&& v, Lambdas&&... lambdas) {
-        return detail::flat_visit(std::forward<Variant>(v), detail::overloaded{ std::forward<Lambdas>(lambdas)... });
+        return cppmatch_detail::flat_visit(std::forward<Variant>(v), cppmatch_detail::overloaded{ std::forward<Lambdas>(lambdas)... });
     }
 
     // ### Exposed Function: zip_match
     // Combines multiple Results, applying f if all are success, or returning the first error.
     template<typename F, typename... Rs>
     constexpr auto zip_match(F&& f, const Rs&... rs) {
-        using SuccessTuple = std::tuple<detail::success_type_t<Rs>...>;
-        using ErrorCommon = detail::deduced_error_t<detail::error_type_t<Rs>...>;
-        using f_return_t = decltype(f(std::declval<detail::success_type_t<Rs>>()...));
+        using SuccessTuple = std::tuple<cppmatch_detail::success_type_t<Rs>...>;
+        using ErrorCommon = cppmatch_detail::deduced_error_t<cppmatch_detail::error_type_t<Rs>...>;
+        using f_return_t = decltype(f(std::declval<cppmatch_detail::success_type_t<Rs>>()...));
         static_assert(!std::is_same_v<f_return_t, void>, "Lambda f must return a non-void value");
-        static_assert(!detail::is_variant_v<f_return_t>, "Lambda f must return a plain success value, not a variant");
+        static_assert(!cppmatch_detail::is_variant_v<f_return_t>, "Lambda f must return a plain success value, not a variant");
         using Return = Result<f_return_t, ErrorCommon>;
-        return detail::zip_match_impl<SuccessTuple, Return>(std::forward<F>(f), std::index_sequence_for<Rs...>{}, rs...);
+        return cppmatch_detail::zip_match_impl<SuccessTuple, Return>(std::forward<F>(f), std::index_sequence_for<Rs...>{}, rs...);
     }
 
-} // namespace resultpp
-
-#endif // RESULTPPNM_HPP
+} // namespace cppmatch
