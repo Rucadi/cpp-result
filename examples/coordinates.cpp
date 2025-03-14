@@ -1,10 +1,10 @@
 #include "result.hpp"
-#include <iostream>
+#include "result.hpp"
+#include <print>
 #include <sstream>
 #include <vector>
 #include <string>
 #include <charconv>
-#include <cctype>
 
 // ANSI escape codes for colors
 #define RESET   "\033[0m"
@@ -71,8 +71,8 @@ Result<std::vector<Coordinate>, std::string> parse_coordinates(const std::string
 
 // Pretty-printing a coordinate
 void print_coordinate(const Coordinate& coord) {
-    std::cout << GREEN << "Parsed Coordinate -> Latitude: " << coord.latitude
-              << ", Longitude: " << coord.longitude << RESET << "\n";
+    std::print("{}Parsed Coordinate -> Latitude: {}, Longitude: {}{}\n",
+               GREEN, coord.latitude, coord.longitude, RESET);
 }
 
 // Testing our parser
@@ -88,18 +88,18 @@ void test_parser() {
     };
 
     for (const auto& test : test_cases) {
-        std::cout << CYAN << "\nInput: \"" << test << "\"" << RESET << "\n";
+        std::print("{}\nInput: \"{}\"{}\n", CYAN, test, RESET);
         auto result = parse_coordinates(test);
         
         match(result,
             [](const std::vector<Coordinate>& coords) {
-                std::cout << GREEN << "Successfully parsed " << coords.size() << " coordinates:\n" << RESET;
+                std::print("{}Successfully parsed {} coordinates:\n{}", GREEN, coords.size(), RESET);
                 for (const auto& coord : coords) {
                     print_coordinate(coord);
                 }
             },
             [](const std::string& err) {
-                std::cout << RED << "Error: " << err << RESET << "\n";
+                std::print("{}Error: {}{}\n", RED, err, RESET);
             }
         );
     }
