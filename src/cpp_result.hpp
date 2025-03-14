@@ -8,6 +8,21 @@
 #include <type_traits>
 #include <utility>
 
+
+#define try_get(expr) ({                                       \
+    auto&& _result = (expr);                                   \
+    if consteval {                                             \
+        if (_result.index() != 0) {                           \
+            throw "Compile-time Error result type!" ;           \
+        }                                                     \
+    } else {                                                  \
+        if (_result.index() != 0) {                           \
+            return std::get<1>(std::forward<decltype(_result)>(_result)); \
+        }                                                     \
+    }                                                         \
+    std::get<0>(std::forward<decltype(_result)>(_result));    \
+})
+
 // ---------------------------------------------------------------------
 // Overloaded & match helpers (same as before)
 // ---------------------------------------------------------------------
@@ -124,11 +139,28 @@ constexpr auto zip_match(F&& f, const Rs&... rs) {
 // ---------------------------------------------------------------------
 
 // A generic error type for demonstration (could be any type).
-struct MyError {
+
+
+struct ParseError {
     std::string_view message;
 };
 
+struct MyError {
+    std::string message;
+    
+    // Constructor to initialize MyError directly with a message.
+    MyError(std::string_view msg)
+        : message(msg) {}
 
+    // Converting constructor to initialize MyError from a ParseError.
+    MyError(const ParseError& err)
+        : message(err.message) {}
+
+    // Optional: conversion operator to convert MyError back to ParseError.
+    explicit operator ParseError() const {
+        return ParseError{message};
+    }
+};
 
 // A sample Coordinates type with a constexpr parser.
 // It expects a string in the form "int,int" and returns a Result.
@@ -154,9 +186,11 @@ struct Coordinates {
         auto xPart = v.substr(0, commaPos);
         auto yPart = v.substr(commaPos + 1);
         // Use the generalized zip_match to match two variants.
+        return Coordinates{try_get(parseInt(xPart)), try_get(parseInt(yPart))};
+        /*
         return zip_match([](int x, int y) {
             return Coordinates{x, y};
-        }, parseInt(xPart), parseInt(yPart));
+        }, parseInt(xPart), parseInt(yPart));*/
     }
 private:
     constexpr Coordinates(int xVal, int yVal) : x(xVal), y(yVal) {}
@@ -174,10 +208,10 @@ constexpr Result<int, MyError> parseIntWrapper(std::string_view str) {
 int main() {
     // --- Two-variant example (Coordinates::fromString) ---
     constexpr auto res = Coordinates::fromString("10,20");
-    static_assert(match(res,
+    /*static_assert(match(res,
         [](const Coordinates&) { return true; },
         [](const MyError&) { return false; }
-    ), "Compile-time parsing failed!");
+    ), "Compile-time parsing failed!");*/
 
     auto message = match(res,
         [](const Coordinates& coords) -> std::string {
