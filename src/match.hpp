@@ -6,7 +6,7 @@
 #include <type_traits>
 
 // Extracts the success value from a Result, handling errors differently in consteval vs. runtime contexts.
-#define try_get(expr) ({                                      \
+#define try_get(expr) __extension__ ({                                      \
     auto&& _result = (expr);                                  \
     if consteval {                                            \
         if (_result.index() != 0) {                           \
