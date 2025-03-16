@@ -4,10 +4,12 @@
 #include <utility>
 #include <tuple>
 #include <type_traits>
+#include <ranges>
 
 #define try_get(expr) __extension__ ({                                        \
     auto&& _result = (expr);                                                  \
     using VariantType = std::remove_reference_t<decltype(_result)>;           \
+    static_assert(std::variant_size_v<VariantType> == 2, "try_get requires a Result<T, E> (std::variant<T, E>)");    \
     if (std::holds_alternative<std::variant_alternative_t<1, VariantType>>(_result)) { \
         return std::get<1>(std::forward<decltype(_result)>(_result));         \
     }                                                                         \
@@ -119,7 +121,7 @@ namespace cppmatch {
                 rs...
             );
         }
-    } // namespace detail
+    } // namespace cppmatch_detail
 
     // Exposed Function: match
     // Applies pattern matching on a variant using provided lambdas.
@@ -156,6 +158,29 @@ namespace cppmatch {
             [&](const E1& err) { return Result<T, E2>{ f(err) }; }
         );
     }
+
+
+    namespace cppmatch_ranges{
+        struct successes_fn {
+            template <std::ranges::range R>
+            friend auto operator|(R&& range, const successes_fn& self) {
+                using VariantType = std::ranges::range_value_t<R>;
+                static_assert(std::variant_size_v<VariantType> == 2, "Variants must have exactly two alternatives");
+    
+                return std::forward<R>(range)
+                    | std::views::filter([](const auto& res) { return std::holds_alternative<std::variant_alternative_t<0, VariantType>>(res); })
+                    | std::views::transform([](const auto& res) { return std::get<0>(res); });
+            }
+    
+            template <std::ranges::range R>
+            auto operator()(R&& range) const {
+                return range | *this;
+            }
+        };
+    
+    } // namespace cppmatch_ranges
+
+    inline constexpr cppmatch_ranges::successes_fn successes{};
 
 
 } // namespace cppmatch
