@@ -23,6 +23,7 @@ using cppmatch::Result;
 using cppmatch::Error;
 using cppmatch::match;
 using cppmatch::zip_match;
+using cppmatch::map_error;
 
 // ---------------------------------------------------------------------------
 // Test functions using the try_get macro.
@@ -146,6 +147,21 @@ void run_tests() {
         static_assert(std::is_same_v<std::variant_alternative_t<0, decltype(t)>, std::monostate>, "Expected monostate");
     }, passed, failed);
 
+    run_test("map_error with success", [](){
+        Result<int, std::string> r = 42;
+        auto r2 = map_error(r, [](const std::string& s) { return s.size(); });
+        CHECK(r2.index() == 0);
+        CHECK(std::get<0>(r2) == 42);
+    }, passed, failed);
+
+    run_test("map_error with error", [](){
+        struct ErrorType1 {};
+        struct ErrorType2 {};
+        Result<int, ErrorType1> r = ErrorType1{};  // Error case
+        Result<int, ErrorType2> r2 = map_error(r, [](const ErrorType1& /*s*/) { return ErrorType2{}; });
+        CHECK(r2.index() == 1);
+        CHECK(std::holds_alternative<ErrorType2>(r2));
+    }, passed, failed);
 
     std::cout << YELLOW << "Summary: Tests passed: " << passed 
               << ", Tests failed: " << failed << RESET << "\n";
