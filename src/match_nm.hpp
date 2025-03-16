@@ -1,6 +1,7 @@
 #pragma once
 
 #include <variant>
+#include <utility>
 #include <tuple>
 
 // ### Exposed Macro: try_get
@@ -111,7 +112,12 @@ namespace cppmatch {
                 [&]<typename... Args>(Args&&... args) -> Return {
                     constexpr bool allSuccess = ((std::is_same_v<std::decay_t<Args>, std::tuple_element_t<I, SuccessTuple>>) && ...);
                     if constexpr (allSuccess) {
-                        return Return{ f(std::forward<Args>(args)...) };
+                        if constexpr (std::is_void_v<decltype(f(std::forward<Args>(args)...))>) {
+                            f(std::forward<Args>(args)...);
+                            return Return{ std::monostate{} };
+                        } else {
+                            return Return{ f(std::forward<Args>(args)...) };
+                        }
                     } else {
                         return Return{ std::in_place_index<1>, pick_first_error<SuccessTuple>(std::forward<Args>(args)...) };
                     }
@@ -136,10 +142,14 @@ namespace cppmatch {
         using SuccessTuple = std::tuple<cppmatch_detail::success_type_t<Rs>...>;
         using ErrorCommon = cppmatch_detail::deduced_error_t<cppmatch_detail::error_type_t<Rs>...>;
         using f_return_t = decltype(f(std::declval<cppmatch_detail::success_type_t<Rs>>()...));
-        static_assert(!std::is_same_v<f_return_t, void>, "Lambda f must return a non-void value");
-        static_assert(!cppmatch_detail::is_variant_v<f_return_t>, "Lambda f must return a plain success value, not a variant");
-        using Return = Result<f_return_t, ErrorCommon>;
+        using success_t = std::conditional_t<std::is_void_v<f_return_t>, std::monostate, f_return_t>;
+        using Return = Result<success_t, ErrorCommon>;
         return cppmatch_detail::zip_match_impl<SuccessTuple, Return>(std::forward<F>(f), std::index_sequence_for<Rs...>{}, rs...);
+    }
+
+    template <typename T, typename E>
+    constexpr T try_get_or(const std::variant<T, E>& result, const T& default_value) {
+        return (result.index() == 0) ? std::get<0>(result) : default_value;
     }
 
 } // namespace cppmatch

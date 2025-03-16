@@ -19,10 +19,10 @@
     } \
 } while(0)
 
-using resultpp::Result;
-using resultpp::Error;
-using resultpp::match;
-using resultpp::zip_match;
+using cppmatch::Result;
+using cppmatch::Error;
+using cppmatch::match;
+using cppmatch::zip_match;
 
 // ---------------------------------------------------------------------------
 // Test functions using the try_get macro.
@@ -135,6 +135,17 @@ void run_tests() {
         CHECK(result.index() == 1);
         CHECK(std::get<1>(result) == "error in b");
     }, passed, failed);
+
+
+    run_test("zip_match() void zip_match returns std::monostate as Ok value", [](){
+        Result<int, std::string> a = 2;
+        Result<int, std::string> b = 1;
+        Result<int, std::string> c = 4;
+        auto t = zip_match([](int x, int y, int z) -> void { }, a, b, c);
+        CHECK(t.index() == 0);
+        static_assert(std::is_same_v<std::variant_alternative_t<0, decltype(t)>, std::monostate>, "Expected monostate");
+    }, passed, failed);
+
 
     std::cout << YELLOW << "Summary: Tests passed: " << passed 
               << ", Tests failed: " << failed << RESET << "\n";
