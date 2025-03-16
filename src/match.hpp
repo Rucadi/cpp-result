@@ -29,10 +29,10 @@ SOFTWARE.
 #include <type_traits>
 #include <ranges>
 
-#define try_get(expr) __extension__ ({                                        \
+#define expect(expr) __extension__ ({                                        \
     auto&& _result = (expr);                                                  \
     using VariantType = std::remove_reference_t<decltype(_result)>;           \
-    static_assert(std::variant_size_v<VariantType> == 2, "try_get requires a Result<T, E> (std::variant<T, E>)");    \
+    static_assert(std::variant_size_v<VariantType> == 2, "expect requires a Result<T, E> (std::variant<T, E>)");    \
     if (std::holds_alternative<std::variant_alternative_t<1, VariantType>>(_result)) { \
         return std::get<1>(std::forward<decltype(_result)>(_result));         \
     }                                                                         \
@@ -165,10 +165,10 @@ namespace cppmatch {
         return cppmatch_detail::zip_match_impl<SuccessTuple, Return>(std::forward<F>(f), std::index_sequence_for<Rs...>{}, rs...);
     }
 
-    // Exposed Function: try_get_or
+    // Exposed Function: default_expect
     // Returns the success value of a Result or a provided default if an error occurred.
     template <typename T, typename E>
-    constexpr T try_get_or(const Result<T, E>& result, T&& default_value) {
+    constexpr T default_expect(const Result<T, E>& result, T&& default_value) {
         return (result.index() == 0) ? std::get<0>(result) : default_value;
     }
 

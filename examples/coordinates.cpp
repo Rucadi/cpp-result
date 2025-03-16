@@ -42,8 +42,8 @@ Result<Coordinate, std::string> parse_coordinate(const std::string& input) {
     }
 
     // Convert latitude and longitude safely
-    double latitude = try_get(safe_str_to_double(lat_str));
-    double longitude = try_get(safe_str_to_double(lon_str));
+    double latitude = expect(safe_str_to_double(lat_str));
+    double longitude = expect(safe_str_to_double(lon_str));
     
     // Validate ranges
     if (latitude < -90 || latitude > 90) return "Latitude out of range (-90 to 90)";
@@ -62,7 +62,7 @@ Result<std::vector<Coordinate>, std::string> parse_coordinates(const std::string
         token.erase(0, token.find_first_not_of(" \t")); // Trim left
         token.erase(token.find_last_not_of(" \t") + 1); // Trim right
         
-        Coordinate coord = try_get(parse_coordinate(token));
+        Coordinate coord = expect(parse_coordinate(token));
         coordinates.push_back(coord);
     }
 

@@ -36,7 +36,7 @@ struct Coordinates {
         auto xPart = v.substr(0, commaPos);
         auto yPart = v.substr(commaPos + 1);
         // Use the generalized zip_match to match two variants.
-        return Coordinates{try_get(parseInt(xPart)), try_get(parseInt(yPart))};
+        return Coordinates{expect(parseInt(xPart)), expect(parseInt(yPart))};
     }
 private:
     constexpr Coordinates(int xVal, int yVal) : x(xVal), y(yVal) {}

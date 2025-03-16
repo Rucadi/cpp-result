@@ -16,7 +16,7 @@ Result<double, MathError> sqrt_(double x) {
 }
 
 int main() {
-    double result = try_get_or(sqrt_(-4.0), -5.1);
+    double result = default_expect(sqrt_(-4.0), -5.1);
 
     std::cout << result << std::endl;
     

@@ -24,8 +24,8 @@ Result<int, ERR2> getError2()
 
 Result<int, Error<ERR1, ERR2>> test()
 {
-    int t = try_get(getError());
-    int t2 = try_get(getError2());
+    int t = expect(getError());
+    int t2 = expect(getError2());
 
     return 10;
 }

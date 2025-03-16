@@ -40,14 +40,14 @@ MathResult ln_(double x) {
         return std::log(x);
 }
 
-// Intermediate function that chains the operations using try_get (similar to the ? operator).
+// Intermediate function that chains the operations using expect (similar to the ? operator).
 MathResult op_(double x, double y) {
     // If div_ fails, its error is immediately returned.
-    double ratio = try_get(div_(x, y));
+    double ratio = expect(div_(x, y));
     // If ln_ fails, its error is returned.
-    double ln_val = try_get(ln_(ratio));
+    double ln_val = expect(ln_(ratio));
     // Finally, return the result of the square root computation.
-    return try_get(sqrt_(ln_val));
+    return expect(sqrt_(ln_val));
 }
 
 // Public function that calls op_ and either prints the result or prints an error message and exits.

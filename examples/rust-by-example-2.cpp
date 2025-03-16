@@ -52,11 +52,11 @@ using MathError = Error<DivisionByZeroError, NonPositiveLogarithmError, Negative
 using MathResult = Result<double, MathError>;
 
 
-// Intermediate function that chains the operations using try_get (similar to the ? operator).
+// Intermediate function that chains the operations using expect (similar to the ? operator).
 MathResult op_(double x, double y) {
-    double ratio = try_get(div_(x, y));
-    double ln_val = try_get(ln_(ratio));
-    return try_get(sqrt_(ln_val));;
+    double ratio = expect(div_(x, y));
+    double ln_val = expect(ln_(ratio));
+    return expect(sqrt_(ln_val));;
 }
 
 // Public function that calls op_ and either prints the result or prints an error message and exits.
