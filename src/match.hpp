@@ -5,20 +5,15 @@
 #include <tuple>
 #include <type_traits>
 
-// Extracts the success value from a Result, handling errors differently in consteval vs. runtime contexts.
-#define try_get(expr) __extension__ ({                                      \
-    auto&& _result = (expr);                                  \
-    if consteval {                                            \
-        if (_result.index() != 0) {                           \
-            static_assert(true, "Compile-time Error: Result contains error");\
-        }                                                   \
-    } else {                                                 \
-        if (_result.index() != 0) {                           \
-            return std::get<1>(std::forward<decltype(_result)>(_result));\
-        }                                                   \
-    }                                                       \
-    std::get<0>(std::forward<decltype(_result)>(_result));   \
+#define try_get(expr) __extension__ ({                                        \
+    auto&& _result = (expr);                                                  \
+    using VariantType = std::remove_reference_t<decltype(_result)>;           \
+    if (std::holds_alternative<std::variant_alternative_t<1, VariantType>>(_result)) { \
+        return std::get<1>(std::forward<decltype(_result)>(_result));         \
+    }                                                                         \
+    std::get<0>(std::forward<decltype(_result)>(_result));                    \
 })
+
 
 namespace cppmatch {
 
