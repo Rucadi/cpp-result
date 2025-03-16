@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <string>
 #include <tuple>
+#include <vector>
 
 // ANSI escape codes for colorful output.
 #define RESET   "\033[0m"
@@ -13,6 +14,7 @@
 #define BLUE    "\033[34m"
 
 // A custom check macro that throws an exception on failure.
+// We use exceptions since it makes no sense to test the library to check for errors with itself.
 #define CHECK(expr) do { \
     if (!(expr)) { \
         throw std::runtime_error("Check failed: " #expr); \
@@ -162,6 +164,26 @@ void run_tests() {
         CHECK(r2.index() == 1);
         CHECK(std::holds_alternative<ErrorType2>(r2));
     }, passed, failed);
+
+    run_test("successes range adaptor", [](){
+        std::vector<Result<int, std::string>> results = {
+            Result<int, std::string>{1},
+            Result<int, std::string>{"error"},
+            Result<int, std::string>{2},
+            Result<int, std::string>{"oops"}
+        };
+        
+    
+        std::vector<int> collected;
+        for (int i : results | cppmatch::successes | std::views::transform([](int x){ return x * x; })) { 
+            collected.push_back(i);
+        }
+        
+        std::vector<int> expected = {1, 4};
+        CHECK(collected == expected);
+    }, passed, failed);
+
+
 
     std::cout << YELLOW << "Summary: Tests passed: " << passed 
               << ", Tests failed: " << failed << RESET << "\n";
