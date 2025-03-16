@@ -5,6 +5,7 @@
 #include <string>
 #include <charconv>
 #include <string_view>
+using namespace cppmatch;
 
 // ANSI escape codes for colors
 #define RESET   "\033[0m"

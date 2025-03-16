@@ -5,6 +5,7 @@
 #include <vector>
 #include <print>
 #include "match.hpp"
+using namespace cppmatch;
 
 struct WebEvent
 {

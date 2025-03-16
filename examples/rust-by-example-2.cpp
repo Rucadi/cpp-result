@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <string>
+using namespace cppmatch;
 
 // Define individual error types as structs.
 struct DivisionByZeroError {

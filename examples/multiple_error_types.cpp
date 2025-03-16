@@ -1,5 +1,7 @@
 #include "match.hpp"
 #include <iostream>
+using namespace cppmatch;
+
 // Custom error types
 struct ParseError {
     std::string message;

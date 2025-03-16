@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cmath>
 #include <cstdlib>
+using namespace cppmatch;
 
 // Define an enum class for math errors.
 enum class MathError {

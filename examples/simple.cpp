@@ -1,6 +1,7 @@
 #include "match.hpp"
 #include <string_view>
 #include <iostream>
+using namespace cppmatch;
 
 struct ERR1{
     std::string_view message;
@@ -20,8 +21,6 @@ Result<int, ERR2> getError2()
 {
     return ERR2{"Error2"};
 }
-
-
 
 Result<int, Error<ERR1, ERR2>> test()
 {

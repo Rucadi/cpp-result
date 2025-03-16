@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <charconv>
+using namespace cppmatch;
 
 // ANSI escape codes for colors
 #define RESET   "\033[0m"
